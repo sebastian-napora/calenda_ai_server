@@ -32,7 +32,7 @@ const getParameter = async (parameterName) => {
 };
 
 
-const port = process.env.PORT || 3000;
+const port = process?.env?.PORT || 3000;
 
 function logErrors(err, req, res, next) {
     console.error(err.stack)
