@@ -75,6 +75,7 @@ function startServer() {
     // ,,
 
     app.get('/helthcheck', async (req, res) => {
+        conosole.info(req, 'helthcheck &&&&&&&&&')
         if (!req.cookies.accessToken) {
             return res.status(403).json({
                 error: 'No credentials sent!'
