@@ -8,14 +8,28 @@ const axios = require("axios");
 
 const cookieParser = require('cookie-parser')
 const jwt = require('jwt-simple')
+const AWS = require('aws-sdk');
+
+const ssm = new AWS.SSM();
 
 dotenv.config();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-const chat = new OpenAI.OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const getParameter = async (parameterName) => {
+    const params = {
+        Name: parameterName,
+        WithDecryption: true, // Decrypt SecureString values
+    };
+
+    try {
+        const response = await ssm.getParameter(params).promise();
+        return response.Parameter.Value;
+    } catch (error) {
+        console.error('Error getting parameter:', error);
+        throw error;
+    }
+};
 
 
 const port = process.env.PORT || 3000;
@@ -37,6 +51,12 @@ function startServer() {
 
     app.post('/api/chat', async (req, res) => {
         const body = req.body;
+
+        const apiKey = await getParameter('OPENAI_API_KEY');
+
+        const chat = new OpenAI.OpenAI({
+            apiKey: process?.env?.OPENAI_API_KEY || apiKey,
+        });
 
         // Call the model by passing an array of messages.
         // In this case, it's a simple greeting
@@ -67,12 +87,14 @@ function startServer() {
             error: 'Wrong credentials!'
         });
 
+        const apiKey = await getParameter('AIRTABLE_API_KEY');
+
         const airtable = await axios.get(
             "https://api.airtable.com/v0/appfTsXOG4PMVPSW2/tbl3tXXLSuR9xrlRJ",
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.VITE_AIRTABLE_API_KEY}`,
+                    Authorization: `Bearer ${process?.env?.VITE_AIRTABLE_API_KEY || apiKey}`,
                 },
                 params: {
                     filterByFormula: `type = 'secret'`,
@@ -96,12 +118,14 @@ function startServer() {
     app.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
+        const apiKey = await getParameter('AIRTABLE_API_KEY');
+
         const airtable = await axios.get(
             "https://api.airtable.com/v0/appfTsXOG4PMVPSW2/tbl3tXXLSuR9xrlRJ",
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.VITE_AIRTABLE_API_KEY}`,
+                    Authorization: `Bearer ${process?.env?.VITE_AIRTABLE_API_KEY || apiKey}`,
                 },
                 params: {
                     filterByFormula: `type = 'user'`,
@@ -114,7 +138,7 @@ function startServer() {
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.VITE_AIRTABLE_API_KEY}`,
+                    Authorization: `Bearer ${process?.env?.VITE_AIRTABLE_API_KEY || apiKey}`,
                 },
                 params: {
                     filterByFormula: `type = 'secret'`,
@@ -173,12 +197,14 @@ function startServer() {
             error: 'Wrong credentials!'
         });
 
+        const airtableApiKey = await getParameter('AIRTABLE_API_KEY');
+
         const airtableSecret = await axios.get(
             "https://api.airtable.com/v0/appfTsXOG4PMVPSW2/tbl3tXXLSuR9xrlRJ",
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.VITE_AIRTABLE_API_KEY}`,
+                    Authorization: `Bearer ${process?.env?.VITE_AIRTABLE_API_KEY || airtableApiKey}`,
                 },
                 params: {
                     filterByFormula: `type = 'secret'`,
@@ -207,6 +233,13 @@ function startServer() {
         const file = new File([buffer], 'audioFile.mp3', {
             type: 'audio/mp3', // Mimetype for MP3 audio
             encoding: '7bit', // Encoding (may be different depending on file content)
+        });
+
+
+        const apiKey = await getParameter('OPENAI_API_KEY');
+
+        const chat = new OpenAI.OpenAI({
+            apiKey: process?.env?.OPENAI_API_KEY || apiKey,
         });
 
         const result = await chat.audio.transcriptions.create({
