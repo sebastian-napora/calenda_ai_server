@@ -44,12 +44,13 @@ function startServer() {
 
     app.use(cors({
         origin: 'http://localhost:3022', credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: {
-            'Content-Type': 'application/json',
+            'Content-Type': '*',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
+            'Access-Control-Allow-Methods': '*',
+            'Access-Control-Allow-Headers': '*'
 
         }
     }))
