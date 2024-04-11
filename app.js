@@ -42,7 +42,17 @@ function logErrors(err, req, res, next) {
 function startServer() {
     const app = express();
 
-    app.use(cors({ origin: 'http://localhost:3022', credentials: true, }))
+    app.use(cors({
+        origin: 'http://localhost:3022', credentials: true,
+        allowedHeaders: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
+
+        }
+    }))
 
     app.use(cookieParser())
 
